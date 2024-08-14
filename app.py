@@ -14,10 +14,17 @@ def get_db_connection():
     )
     return connection
 
-app.route('/')
+@app.route('/')
 def index():
     return 'Hello, world!'
 
+@app.route('/pets')
+def pets_index():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM pets;")
+    pets = cursor.fetchall()
+    connection.close()
+    return pets
 
-
-app.run
+app.run()
