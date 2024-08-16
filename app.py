@@ -20,12 +20,15 @@ def index():
 
 @app.route('/pets')
 def pets_index():
-    connection = get_db_connection()
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cursor.execute("SELECT * FROM pets;")
-    pets = cursor.fetchall()
-    connection.close()
-    return pets
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("SELECT * FROM pets;")
+        pets = cursor.fetchall()
+        connection.close()
+        return pets
+    except:
+        return "Application Error", 500
 
 @app.route('/create_pets', methods=['POST'])
 def create_pet():
@@ -37,6 +40,21 @@ def create_pet():
         created_pet = cursor.fetchone()  
         connection.commit()
         return created_pet, 201
+    except Exception as e:
+        return str(e), 500
+    
+@app.route('/pets/<pet_id>', methods=['GET'])
+def show_pet(pet_id):
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("SELECT * FROM pets WHERE id = %s", (pet_id,))
+        pet = cursor.fetchone()
+        if pet is None:
+            connection.close()
+            return "Pet Not Found", 404
+        connection.close()
+        return pet, 200
     except Exception as e:
         return str(e), 500
     
