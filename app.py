@@ -1,9 +1,12 @@
 from flask import Flask, request
 from dotenv import load_dotenv
 import os, psycopg2 , psycopg2.extras
+from flask_cors import CORS
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app)
 
 def get_db_connection():
     connection = psycopg2.connect(
