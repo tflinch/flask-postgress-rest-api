@@ -58,6 +58,31 @@ def show_pet(pet_id):
     except Exception as e:
         return str(e), 500
     
+@app.route('/pets/<pet_id>', methods=['DELETE'])
+def delete_pet(pet_id):
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("SELECT * FROM pets WHERE id = %s", (pet_id,))
+        connection.commit()
+        cursor.close()
+        return "Pet deleted successfully", 204
+    except Exception as e:
+        return str(e), 500
 
+@app.route('/pets/<pet_id>', methods=['PUT'])
+def update_pet(pet_id):
+    try:
+      connection = get_db_connection()
+      cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+      cursor.execute("UPDATE pets SET name = %s, age = %s, breed = %s WHERE id = %s RETURNING *", (request.json['name'], request.json['age'], request.json['breed'], pet_id))
+      updated_pet = cursor.fetchone()
+      if updated_pet is None:
+        return "Pet Not Found", 404
+      connection.commit()
+      connection.close()
+      return updated_pet, 202
+    except Exception as e:
+      return str(e), 500
 
 app.run()
